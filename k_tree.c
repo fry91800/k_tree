@@ -140,46 +140,36 @@ void splitChild(struct k_tree* myTree,int childId){
 void insert(struct k_tree* myTree,int val){
 	//Insert if the node is a leaf and has space
 	if (isleafNotFull(myTree)){
-		printf("Feuille non vide j'ajoute %d\n",val); //------------------------------------------------
 		addToNode(myTree,val);
 		return;
 	}
 	//If the root is full we split it and we try again from the root
 	if (isfull(myTree)){
-		printf("Root Full, je split\n");//--------------------------------------------------------
 		split(myTree);
-		//insert(myTree,val);
 	}
 	//Find the right child to add the value
 	int childIdToCheck = getWhichChild(myTree, val);
 	//If there is no child we make one
 	if (myTree->childIdx[childIdToCheck] == 0){
-		printf("Pas de child je créer avec la valeur %d\n", val);//--------------------------------------------------------
 		myTree->childIdx[childIdToCheck] = nodeCount + 1;
 		struct k_tree *newChild = createTree(val);
 		return;
 	}
 	//If that child is full we split it then we try again on the same node
 	if (isfull(nodeArray[myTree->childIdx[childIdToCheck]])){
-		printf("Split foireusement le child qui est full\n");//--------------------------------------------------------
 		splitChild(myTree,childIdToCheck);
 		insert(myTree, val);
 
 	}
 	// else if that child has space we insert into it
 	else{
-		printf("Appel récursif sur le fils trouve pour ajouter %d\n",val);
 		insert(nodeArray[myTree->childIdx[childIdToCheck]],val);
 	}
-	//Then we call the function on that child OR LETS TRY ON THE SAME NODE
-	//printf("Appel récursif sur le node %d, valeur du node courrant : %d\n, valeur a ajouter : %d", childIdToCheck, myTree->values[0], val);//--------------------------------------------------------
-	//insert(nodeArray[myTree->childIdx[childIdToCheck]],val);
-	//insert(myTree,val);
 	
 	
 }
 
-
+//Test function to get information about the node
 void printNode(struct k_tree* myTree){
 	printf("\nvalues : ");
 	for (int i = 0 ; i < myTree->nv; i++ ){
