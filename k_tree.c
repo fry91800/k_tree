@@ -5,6 +5,7 @@
 
 //Global variables for the fake pointers
 int nodeCount;
+int maxNode;
 struct k_tree **nodeArray;
 
 
@@ -27,6 +28,11 @@ struct k_tree *createTree(int val){
 	myTree->childIdx[2] = 0;
 	myTree->childIdx[3] = 0;
 	//Add the reference in the node array
+	//Realloc when the nodeArray is about to be full
+	if (nodeCount == maxNode-16){
+		maxNode = maxNode*2;
+		realloc(nodeArray, maxNode);
+	}
 	nodeArray[++nodeCount] = myTree;
 	//Return
 	return myTree;
@@ -100,8 +106,8 @@ void split(struct k_tree* myTree){
 	newRightChild->childIdx[1] = myTree->childIdx[3];
 	myTree->childIdx[0] = indexLeft;
 	myTree->childIdx[1] = indexRight;
-	myTree->childIdx[2] = 0;
-	myTree->childIdx[3] = 0;
+	//myTree->childIdx[2] = 0;
+	//myTree->childIdx[3] = 0;
 	//Correct original node values 
 	myTree->values[0] = myTree->values[1];
 	myTree->nv = 1;
@@ -113,7 +119,7 @@ void addToNodeWithPos(struct k_tree* myTree,int val,int pos){
 	//Shift values to make some space, shift children during the process
 	for(int i = myTree->nv; i > pos; i--){
 		myTree->values[i] = myTree->values[i-1];
-		myTree->childIdx[i] = myTree->childIdx[i-1];
+		myTree->childIdx[i+1] = myTree->childIdx[i];
 	}
 	//Add the value to the node
 	myTree->values[pos] = val;
@@ -133,6 +139,7 @@ void splitChild(struct k_tree* myTree,int childId){
 	nodeArray[myTree->childIdx[childId]]->nv = 1;
 	//new node is the right child of the new value added to the parent node
 	myTree->childIdx[childId+1] = nodeCount;
+	//un ptit test
 	
 }
 
@@ -176,10 +183,8 @@ void printNode(struct k_tree* myTree){
 		printf("|%d|",myTree->values[i]);
 	}
 	printf("\n\n");
-	printf("number of values : %d", myTree->nv);
-	printf("\n\n");
 	for (int i = 0; i <= 3; i++){
-		printf("children %d index : %d\n", i, myTree->childIdx[i]);
+		printf("child %d : %d\n", i, myTree->childIdx[i]);
 	}
 	printf("\n");
 }
@@ -187,7 +192,8 @@ void printNode(struct k_tree* myTree){
 
 int main (int argc, char* argv[]){
 	//Initialising global variables
-	nodeArray = malloc(1024*(sizeof(struct k_tree)));
+	int maxNode = 1024;
+	nodeArray = malloc(maxNode*4);
 	nodeCount = 0;
 	//Creating a new tree
 	struct k_tree *myTree = createTree(1);
@@ -196,9 +202,11 @@ int main (int argc, char* argv[]){
 	insert(myTree,4);
 	insert(myTree,5);
 	insert(myTree,6);
-	insert(myTree,7);
-	insert(myTree,8);
-	//insert(myTree,0);
-	printNode(nodeArray[5]);
+	insert(myTree,6);
+	printNode(nodeArray[1]);
+	printNode(nodeArray[2]);
+	printNode(nodeArray[3]);
+	printNode(nodeArray[4]);
+
 	free(nodeArray);
 }
