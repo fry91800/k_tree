@@ -1,6 +1,5 @@
 #include<stdio.h>
 #include<stdlib.h>
-#include <Windows.h>
 #define MAX_VALUES 3
 #define MAX_CHILD 4
 
@@ -27,7 +26,7 @@ struct k_tree *createTree(int val){
 	myTree->childIdx[1] = 0;
 	myTree->childIdx[2] = 0;
 	myTree->childIdx[3] = 0;
-	//Modify global variables
+	//Add the reference in the node array
 	nodeArray[++nodeCount] = myTree;
 	//Return
 	return myTree;
@@ -36,41 +35,40 @@ struct k_tree *createTree(int val){
 
 int isleaf(struct k_tree* myTree){
 	//If each child is the empty value then it's a leaf
-	return (myTree->childIdx[0] == 0 && myTree->childIdx[1] == 0
-	&& myTree->childIdx[2] == 0 && myTree->childIdx[3] == 0);
+	for(int i = 0; i < MAX_CHILD; i++){
+		if (myTree->childIdx[i] != 0)
+			return 0;
+	}
+	return 1;
 }
 
 int isfull(struct k_tree* myTree){
-	//If each child is different from the empty child value(0) then it's full
-	return myTree->nv == 3;
+	//If the number of values is equal to the max set then it's full
+	return myTree->nv == MAX_VALUES;
 }
 
 
-int addToNode(struct k_tree* myTree, int val){
-	//Simply add to a node
-	int pos = -1; //mod
-	if (myTree->nv == 0){
-		myTree->values[0] = val;
-		pos = 0; //mod
+void addToNode(struct k_tree* myTree, int val){
+	//If the value already exist then exit
+	for (int i = 0; i<MAX_CHILD; i++){
+		if (myTree->values[i] == val)
+			return;
 	}
-	else{
-		for ( int idx = (myTree->nv)-1 ; idx >= 0; idx-- ){
-			if (val > myTree->values[idx]){
-				myTree->values[idx+1] = val;
-				pos = idx+1; //mod
-				break;
-				}
-			else if (val < myTree->values[idx]){
-				myTree->values[idx+1] = myTree->values[idx];
-			if (idx == 0)
-				myTree->values[idx] = val;
-				pos = 0; //mod
-				
+
+	//Else the value is added
+	for ( int idx = (myTree->nv)-1 ; idx >= 0; idx-- ){
+		if (val > myTree->values[idx]){
+			myTree->values[idx+1] = val;
+			break;
 			}
+		else if (val < myTree->values[idx]){
+			myTree->values[idx+1] = myTree->values[idx];
+		if (idx == 0)
+			myTree->values[idx] = val;
+			
 		}
 	}
 	++(myTree->nv);
-	return pos; //mod
 }
 
 
@@ -80,7 +78,7 @@ int isleafNotFull(struct k_tree* myTree){
 
 
 int getWhichChild(struct k_tree* myTree, int val){
-	//Return the number of the child that has to receive a new value
+	//Return the index of the child that has to receive a new value
 	for (int i = 0; i < myTree->nv; i++){
 		if (val < myTree->values[i]){
 			return i;
@@ -102,12 +100,16 @@ void split(struct k_tree* myTree){
 	newRightChild->childIdx[1] = myTree->childIdx[3];
 	myTree->childIdx[0] = indexLeft;
 	myTree->childIdx[1] = indexRight;
+	myTree->childIdx[2] = 0;
+	myTree->childIdx[3] = 0;
 	//Correct original node values 
 	myTree->values[0] = myTree->values[1];
 	myTree->nv = 1;
 }
 
 void addToNodeWithPos(struct k_tree* myTree,int val,int pos){
+	//The difference with addToNode is that we know where to add the new value
+	//Also since we are in a parent node the children indexes might need to be right shifted
 	//Shift values to make some space, shift children during the process
 	for(int i = myTree->nv; i > pos; i--){
 		myTree->values[i] = myTree->values[i-1];
@@ -204,6 +206,9 @@ int main (int argc, char* argv[]){
 	insert(myTree,4);
 	insert(myTree,5);
 	insert(myTree,6);
+	insert(myTree,7);
+	insert(myTree,8);
 	//insert(myTree,0);
-	printNode(nodeArray[4]);
+	printNode(nodeArray[5]);
+	free(nodeArray);
 }
